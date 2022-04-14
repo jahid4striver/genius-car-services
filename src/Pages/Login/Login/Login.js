@@ -1,23 +1,39 @@
 import React from 'react';
 import { useRef } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import auth from '../../../firebase.init';
 
 const Login = () => {
-    const emailRef= useRef('');
-    const passwordRef= useRef('');
-    const navigate= useNavigate();
+    const emailRef = useRef('');
+    const passwordRef = useRef('');
+    const navigate = useNavigate();
+    const location= useLocation();
+    const from= location.state?.from?.pathname || '/';
 
-const handleSubmit= event=>{
-    event.preventDefault();
-    const email= emailRef.current.value;
-    const password= passwordRef.current.value;
-    console.log(email, password);
-}
+    const [
+        signInWithEmailAndPassword,
+        user,
+        loading,
+        error,
+    ] = useSignInWithEmailAndPassword(auth);
 
-const navigateReg= ()=>{
-    navigate('/register');
-}
+    if (user) {
+        navigate(from, {replace:true});
+    }
+
+    const handleSubmit = event => {
+        event.preventDefault();
+        const email = emailRef.current.value;
+        const password = passwordRef.current.value;
+
+        signInWithEmailAndPassword(email, password);
+    }
+
+    const navigateReg = () => {
+        navigate('/register');
+    }
 
     return (
         <div className='container w-50 mx-auto'>
@@ -25,7 +41,7 @@ const navigateReg= ()=>{
             <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label>Email address</Form.Label>
-                    <Form.Control ref={emailRef} type="email" placeholder="Enter email" required/>
+                    <Form.Control ref={emailRef} type="email" placeholder="Enter email" required />
                     <Form.Text className="text-muted">
                         We'll never share your email with anyone else.
                     </Form.Text>
